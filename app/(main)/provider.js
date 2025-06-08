@@ -1,7 +1,17 @@
 import React from "react";
+import { AppSidebar } from "./_components/AppSideBar";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 
 function DashboardProvider({ children }) {
-  return <div>{children}</div>;
+  return (
+    <SidebarProvider>
+      <AppSidebar />
+      <div className="w-full">
+        <SidebarTrigger />
+        {children}
+      </div>
+    </SidebarProvider>
+  );
 }
 
 export default DashboardProvider;
