@@ -17,8 +17,6 @@ function CreateInterview() {
       ...prev,
       [field]: value,
     }));
-
-    console.log(formData);
   };
 
   const onGoToNext = () => {
@@ -47,7 +45,7 @@ function CreateInterview() {
           GoToNext={() => onGoToNext()}
         />
       )}
-      {step == 2 && <QuestionsList formData={formData}/>}
+      {step == 2 && <QuestionsList formData={formData} />}
     </div>
   );
 }
