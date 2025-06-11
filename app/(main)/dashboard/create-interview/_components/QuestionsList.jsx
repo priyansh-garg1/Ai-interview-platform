@@ -1,15 +1,23 @@
+import { Button } from "@/components/ui/button";
 import axios from "axios";
 import { Loader2Icon } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
+import QuestionListContainer from "./QuestionListContainer";
+import { supabase } from "@/services/supabaseClient";
+import { useUser } from "@/app/provider";
+import { v4 as uuidv4 } from "uuid";
 
-function QuestionsList({ formData }) {
+function QuestionsList({ formData, onCreateLink }) {
   const [loading, setLoading] = useState(true);
   const [questionsList, setQuestionsList] = useState([]);
+  const [saveLoading, setSaveLoading] = useState(false);
+
+  const { user } = useUser();
 
   useEffect(() => {
     if (formData) {
-      // GenerateQuestionList();
+      GenerateQuestionList();
     }
   }, [formData]);
 
@@ -32,6 +40,24 @@ function QuestionsList({ formData }) {
     }
   };
 
+  const onFinish = async () => {
+    setSaveLoading(true);
+    const interviewId = uuidv4();
+    const { data, error } = await supabase
+      .from("interviews")
+      .insert([
+        {
+          ...formData,
+          questionList: questionsList,
+          userEmail: user?.app_metadata?.email,
+          interview_id: interviewId,
+        },
+      ])
+      .select();
+    setSaveLoading(false);
+    onCreateLink(interviewId);
+  };
+
   return (
     <div>
       {loading && (
@@ -46,18 +72,22 @@ function QuestionsList({ formData }) {
           </div>
         </div>
       )}
-      {
-        questionsList.length>0 && <div className="p-5 border border-gray-400 rounded-xl bg-white">
-          {
-            questionsList.map((item,index) => (
-              <div key={index} className="p-3 bg-white rounded-2xl border border-gray-200 gap-3 mb-5">
-                <h2 className="font-medium">{item.question}</h2>
-                <h2 className="text-sm text-primary">Type: {item?.type}</h2>
-              </div>
-            ))
-          }
+      {questionsList.length > 0 && (
+        <div className="">
+          <QuestionListContainer questionsList={questionsList} />
         </div>
-      }
+      )}
+      {!loading && (
+        <div className="flex justify-end mt-10">
+          <Button disabled={saveLoading} onClick={onFinish}>
+            {saveLoading ? (
+              <Loader2Icon className="animate-spin" />
+            ) : (
+              "Create Interview and Get Link"
+            )}
+          </Button>
+        </div>
+      )}
     </div>
   );
 }
